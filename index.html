@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="es" data-tema="claro">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Portal·Dex — Explorador del multiverso</title>
+  <meta name="description" content="Explorador interactivo de personajes de Rick and Morty con búsqueda, filtros y favoritos.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bagel+Fat+One&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <script>
+    (function () {
+      try {
+        var tema = localStorage.getItem("portaldex:tema");
+        if (!tema) tema = "claro";
+        document.documentElement.dataset.tema = tema;
+      } catch (e) {}
+    })();
+  </script>
+</head>
+<body>
+  <div class="fondo" aria-hidden="true">
+    <span class="mancha mancha--verde"></span>
+    <span class="mancha mancha--rosa"></span>
+    <span class="mancha mancha--cian"></span>
+  </div>
+
+  <header class="cabecera">
+    <a class="logo" href="#inicio" aria-label="Portal·Dex, inicio">
+      <span class="logo__sello">Portal</span><span class="logo__punto">·</span><span class="logo__dex">Dex</span>
+    </a>
+    <nav class="pestanas" aria-label="Secciones">
+      <button class="pestana is-activa" type="button" data-vista="explorar">Explorar</button>
+      <button class="pestana" type="button" data-vista="favoritos">
+        Favoritos <span class="insignia" id="contadorFavoritos">0</span>
+      </button>
+      <button class="boton-tema" type="button" id="botonTema" aria-label="Cambiar entre modo oscuro y claro">
+        <svg class="icono icono--luna" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z" fill="currentColor"/></svg>
+        <svg class="icono icono--sol" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4.5" fill="currentColor"/><g stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M4.9 19.1L7 17M17 7l2.1-2.1"/></g></svg>
+      </button>
+    </nav>
+  </header>
+
+  <main id="inicio">
+    <section class="heroe">
+      <div class="portal" aria-hidden="true"><span></span></div>
+      <p class="heroe__etiqueta">Dimensión C-137 · datos en vivo</p>
+      <h1 class="heroe__titulo">
+        <span>Todos los</span>
+        <span class="heroe__titulo--desplazado">rostros del</span>
+        <span class="heroe__titulo--marca">multiverso</span>
+      </h1>
+      <p class="heroe__texto">
+        Busca, filtra y colecciona a tus personajes favoritos. Cada dato llega directo desde la API pública de Rick and Morty.
+      </p>
+      <div class="pegatinas">
+        <span class="pegatina pegatina--verde"><strong id="totalPersonajes">—</strong> personajes</span>
+        <span class="pegatina pegatina--rosa">fetch() en vivo</span>
+        <span class="pegatina pegatina--naranja">guardado local ♥</span>
+      </div>
+    </section>
+
+    <section id="vistaExplorar" class="vista" aria-label="Explorar personajes">
+      <form class="panel" id="panelFiltros" role="search" autocomplete="off">
+        <label class="campo campo--busqueda">
+          <span>Buscar por nombre</span>
+          <input type="search" id="buscador" placeholder="Rick, Morty, Summer…" maxlength="40">
+        </label>
+        <label class="campo">
+          <span>Estado</span>
+          <select id="filtroEstado">
+            <option value="">Todos</option>
+            <option value="alive">Vivo</option>
+            <option value="dead">Muerto</option>
+            <option value="unknown">Desconocido</option>
+          </select>
+        </label>
+        <label class="campo">
+          <span>Género</span>
+          <select id="filtroGenero">
+            <option value="">Todos</option>
+            <option value="male">Masculino</option>
+            <option value="female">Femenino</option>
+            <option value="genderless">Sin género</option>
+            <option value="unknown">Desconocido</option>
+          </select>
+        </label>
+        <label class="campo">
+          <span>Especie</span>
+          <select id="filtroEspecie">
+            <option value="">Todas</option>
+            <option value="Human">Humano</option>
+            <option value="Alien">Alienígena</option>
+            <option value="Humanoid">Humanoide</option>
+            <option value="Robot">Robot</option>
+            <option value="Animal">Animal</option>
+            <option value="Cronenberg">Cronenberg</option>
+            <option value="Mythological Creature">Criatura mitológica</option>
+            <option value="Disease">Enfermedad</option>
+            <option value="Poopybutthole">Poopybutthole</option>
+          </select>
+        </label>
+        <label class="campo">
+          <span>Ordenar página</span>
+          <select id="orden">
+            <option value="original">Orden original</option>
+            <option value="az">Nombre A → Z</option>
+            <option value="za">Nombre Z → A</option>
+          </select>
+        </label>
+        <button type="button" class="boton boton--fantasma" id="limpiarFiltros">Limpiar</button>
+      </form>
+
+      <div id="mensaje" class="mensaje" role="status" aria-live="polite" hidden></div>
+      <div id="cuadricula" class="cuadricula" aria-live="polite"></div>
+
+      <nav class="paginacion" id="paginacion" aria-label="Paginación" hidden>
+        <button type="button" class="boton" id="paginaAnterior">← Anterior</button>
+        <span class="paginacion__texto" id="textoPagina">Página 1 de 1</span>
+        <button type="button" class="boton" id="paginaSiguiente">Siguiente →</button>
+      </nav>
+    </section>
+
+    <section id="vistaFavoritos" class="vista" aria-label="Favoritos" hidden>
+      <div class="favoritos__cabecera">
+        <h2 class="titulo-seccion">Tu colección <em>♥</em></h2>
+        <button type="button" class="boton boton--fantasma" id="vaciarFavoritos">Vaciar favoritos</button>
+      </div>
+      <div id="mensajeFavoritos" class="mensaje" hidden></div>
+      <div id="cuadriculaFavoritos" class="cuadricula"></div>
+    </section>
+  </main>
+
+  <footer class="pie">
+    <p>Hecho con HTML, CSS y JavaScript · Datos de <a href="https://rickandmortyapi.com" target="_blank" rel="noopener">The Rick and Morty API</a></p>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>
